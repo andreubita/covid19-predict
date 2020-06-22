@@ -25,7 +25,7 @@ async function getData(){
     const xs = [];
     const ys = [];
 
-    const response = await fetch('../../covid19pt-data/data.csv');
+    const response = await fetch('covid19pt-data/data.csv');
     const data = await response.text();
 
     const table = data.split('\n').slice(1);
