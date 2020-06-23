@@ -1,16 +1,23 @@
+const dates = [];
+const cases = [];
+const newCases = [];
+const deaths = [];
+const recover = [];
+const growthFactors = [];
 
 charIt();
 async function charIt(){
-    const data = await getData();
+    await getData();
+    growthFactor();
     const ctx = document.getElementById('chart').getContext('2d');
     const myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: data.xs,
+            labels: dates,
             datasets: [
                 {
                     label: 'COVID-19 CASES',
-                    data: data.ys,
+                    data: cases,
                     fill: false,
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     borderColor: 'rgba(255, 99, 132, 1)',
@@ -21,22 +28,33 @@ async function charIt(){
     });
 }
 
-async function getData(){
-    const xs = [];
-    const ys = [];
+// WIP
+function growthFactor(){
+    for (let i = 0; i < cases.length; i++) {
+        let factor;
+        let total;
+        total = (i == 0) ? 0 : newCases[i] + newCases[i-1];
+        factor = (i == 0) ? 0 : 1 + newCases[i] - total / total;
+        //factor = (i == 0) ? 0 : newCases[i] / newCases[i-1];
+        growthFactors.push(factor);
+    }
+    console.log(growthFactors);
+}
 
+async function getData(){
     const response = await fetch('covid19pt-data/data.csv');
     const data = await response.text();
 
-    const table = data.split('\n').slice(1);
+    const table = data.split('\n').slice(6);
     table.forEach(crt => {
         const columns = crt.split(',');
         const date = columns[0];
-        xs.push(date);
-        const cases = columns[2];
-        ys.push(cases);
-        const deaths = columns[13];
-        console.log(date, cases, deaths);
+        dates.push(date);
+        const infected = parseInt(columns[2]);
+        cases.push(infected);
+        const casesNew = parseInt(columns[11]);
+        newCases.push(casesNew);
+        const deaths = parseInt(columns[13]);
+        console.log(date, infected, deaths);
     });
-    return {xs,ys};
 }
